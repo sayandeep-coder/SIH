@@ -1,0 +1,12 @@
+.venv/
+.git/
+.pytest_cache/
+__pycache__/
+*.pyc
+frontend/
+data/raw/*
+data/processed/*
+tests/
+.env
+.env.example
+README.md
