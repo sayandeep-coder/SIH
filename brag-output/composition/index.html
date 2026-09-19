@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>India Airfare Index — Brag</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0f172a;
+        font-family: "IBM Plex Sans", ui-sans-serif, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .mono {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      /* ===== Scene 1 / Scene 5 — terminal ===== */
+      .terminal-scene {
+        background: #050810;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 28px;
+      }
+      .terminal-line {
+        display: flex;
+        align-items: baseline;
+        font-size: 42px;
+        font-weight: 500;
+        color: #dce4ff;
+        letter-spacing: 0.04em;
+        min-width: 1180px;
+        white-space: nowrap;
+      }
+      .terminal-line .prompt {
+        color: #4a6fd4;
+        margin-right: 18px;
+      }
+      .terminal-cursor {
+        display: inline-block;
+        width: 20px;
+        height: 44px;
+        background: #63e6be;
+        margin-left: 6px;
+      }
+      .pulse-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0;
+      }
+      .pulse-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #63e6be;
+        box-shadow: 0 0 16px 4px rgba(99, 230, 190, 0.5);
+      }
+      .pulse-label {
+        font-size: 18px;
+        letter-spacing: 0.12em;
+        color: #63e6be;
+      }
+      .outro-logo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+        margin-top: 12px;
+      }
+      .outro-logo-icon {
+        width: 48px;
+        height: 48px;
+        border: 1px solid #3157aa;
+        background: #17264c;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+      }
+      .outro-logo-icon svg {
+        width: 24px;
+        height: 24px;
+      }
+      .outro-logo-text {
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      /* ===== Scene 2 / 3 — dashboard shell ===== */
+      .dash-scene {
+        background: #f7f9fd;
+        display: flex;
+      }
+      .sidebar {
+        width: 320px;
+        height: 100%;
+        background: #0f172a;
+        color: #cbd5e1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-right: 1px solid #273449;
+        flex-shrink: 0;
+        transform: translateX(-320px);
+      }
+      .brand {
+        padding: 22px;
+        border-bottom: 1px solid #263247;
+      }
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand-icon {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #3157aa;
+        background: #17264c;
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+      }
+      .brand-icon svg {
+        width: 22px;
+        height: 22px;
+        color: #dce4ff;
+      }
+      .brand-title {
+        display: block;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+      .brand-sub {
+        display: block;
+        font: 12px/16px "JetBrains Mono", monospace;
+        color: #94a3b8;
+        margin-top: 2px;
+      }
+      .baseline-pill {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 14px;
+        padding: 5px 8px;
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 4px;
+        font: 11px "JetBrains Mono", monospace;
+        letter-spacing: 0.03em;
+        color: #cbd5e1;
+      }
+      .baseline-pill i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #63e6be;
+        margin-right: 7px;
+        display: inline-block;
+      }
+      .nav {
+        padding: 12px 8px;
+        display: grid;
+        gap: 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 11px 14px;
+        color: #cbd5e1;
+        border-radius: 5px;
+        font-size: 15px;
+      }
+      .nav-item.active {
+        background: #1e293b;
+        color: #fff;
+        border-left: 2px solid #bec8ff;
+      }
+      .nav-item svg {
+        width: 18px;
+        height: 18px;
+        color: #94a3b8;
+        flex-shrink: 0;
+      }
+      .nav-item.active svg {
+        color: #dce4ff;
+      }
+      .sidebar-status {
+        padding: 18px;
+        background: #0b1120;
+        border-top: 1px solid #253149;
+        font: 11px/18px "JetBrains Mono", monospace;
+        color: #94a3b8;
+      }
+      .sidebar-status-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .sidebar-status-row b {
+        color: #cbd5e1;
+      }
+
+      .main-panel {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+      }
+      .telemetry {
+        background: #0f172a;
+        color: #94a3b8;
+        font: 12px/1 "JetBrains Mono", monospace;
+        padding: 12px 32px;
+        display: flex;
+        justify-content: space-between;
+        letter-spacing: 0.04em;
+      }
+      .telemetry b {
+        color: #cbd5e1;
+      }
+      .telemetry i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #63e6be;
+        display: inline-block;
+        margin-right: 7px;
+        box-shadow: 0 0 8px 2px rgba(99, 230, 190, 0.6);
+      }
+      .content {
+        flex: 1;
+        padding: 34px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+      .hero-title {
+        font-size: 15px;
+        color: #103aa5;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+      }
+      .hero-h1 {
+        font-size: 44px;
+        font-weight: 700;
+        color: #102238;
+        letter-spacing: -0.01em;
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+      }
+      .kpi-card {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 8px;
+        padding: 18px;
+        opacity: 0;
+        box-shadow: 0 1px 2px rgba(16, 34, 56, 0.04);
+      }
+      .kpi-label {
+        font-size: 12px;
+        color: #475569;
+        font-weight: 500;
+        margin-bottom: 10px;
+        letter-spacing: 0.02em;
+      }
+      .kpi-value {
+        font-size: 30px;
+        font-weight: 700;
+        color: #102238;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .kpi-foot {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #475569;
+      }
+
+      .table-card {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 8px;
+        padding: 22px 24px;
+        flex: 1;
+        opacity: 0;
+      }
+      .table-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 16px;
+      }
+      .table-heading h2 {
+        font-size: 19px;
+        color: #102238;
+        font-weight: 600;
+      }
+      .table-heading span {
+        font: 11px "JetBrains Mono", monospace;
+        color: #103aa5;
+        background: #e6eeff;
+        padding: 4px 9px;
+        border-radius: 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead th {
+        text-align: left;
+        font: 11px "JetBrains Mono", monospace;
+        color: #475569;
+        letter-spacing: 0.06em;
+        padding: 8px 6px;
+        border-bottom: 1px solid #dce4f0;
+      }
+      tbody td {
+        padding: 13px 6px;
+        font-size: 15px;
+        color: #102238;
+        border-bottom: 1px solid #eef2f8;
+      }
+      tbody td b {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .fare-row {
+        opacity: 0;
+      }
+      .fare-row td:nth-child(3) {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        color: #07583e;
+      }
+
+      /* ===== Scene 4 — index detail ===== */
+      .ribbon {
+        background: #0f172a;
+        color: #94a3b8;
+        font: 12px/1 "JetBrains Mono", monospace;
+        padding: 12px 32px;
+        display: flex;
+        justify-content: space-between;
+        letter-spacing: 0.03em;
+      }
+      .ribbon b {
+        color: #cbd5e1;
+      }
+      .ribbon-dot {
+        color: #63e6be;
+      }
+      .detail-tag {
+        display: inline-block;
+        font: 11px "JetBrains Mono", monospace;
+        color: #103aa5;
+        background: #e6eeff;
+        padding: 4px 10px;
+        border-radius: 4px;
+        letter-spacing: 0.04em;
+        margin-bottom: 10px;
+      }
+      .method-card {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 8px;
+        padding: 26px 30px;
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      .method-label {
+        font-size: 12px;
+        color: #64748b;
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+      }
+      .method-value {
+        font-size: 26px;
+        font-weight: 700;
+        color: #102238;
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: -0.01em;
+      }
+      .scrape-card {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 8px;
+        padding: 22px 26px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      .scrape-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .scrape-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #f5a623;
+      }
+      .scrape-route {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 20px;
+        font-weight: 700;
+        color: #102238;
+      }
+      .scrape-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 3px;
+      }
+      .scrape-badge {
+        font: 12px "JetBrains Mono", monospace;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        padding: 7px 14px;
+        border-radius: 5px;
+        background: #fef3e2;
+        color: #b45309;
+      }
+      .scrape-badge.success {
+        background: #d8f3e8;
+        color: #07583e;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- ============ SCENE 1 — Hook (0-3s) ============ -->
+      <section id="scene1" class="clip terminal-scene" data-start="0" data-duration="3" data-track-index="0">
+        <div class="terminal-line mono" id="s1-line">
+          <span class="prompt">&gt;</span><span id="s1-text"></span><span class="terminal-cursor" id="s1-cursor"></span>
+        </div>
+        <div class="pulse-row mono" id="s1-pulse">
+          <span class="pulse-dot"></span>
+          <span class="pulse-label">LIVE</span>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 2 — Dashboard reveal (3-7s) ============ -->
+      <section id="scene2" class="clip dash-scene" data-start="3" data-duration="4" data-track-index="0">
+        <aside class="sidebar" id="s2-sidebar" data-layout-allow-overflow="true">
+          <div>
+            <div class="brand">
+              <div class="brand-row">
+                <div class="brand-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+                </div>
+                <div>
+                  <strong class="brand-title">India Airfare Index</strong>
+                  <small class="brand-sub">Real-time airfare intelligence</small>
+                </div>
+              </div>
+              <span class="baseline-pill"><i></i>MoSPI / GoI CPI Baseline</span>
+            </div>
+            <nav class="nav">
+              <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Overview</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>Airfare Index</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6M18 6a9 9 0 0 1-9 9"/></svg>Routes</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/></svg>Fare Observations</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>Scrape Runs</div>
+            </nav>
+          </div>
+          <div class="sidebar-status">
+            <div class="sidebar-status-row"><span>SOURCE</span><b>Google Flights</b></div>
+            <div class="sidebar-status-row"><span>LAST SCRAPE</span><b>2m ago</b></div>
+          </div>
+        </aside>
+        <div class="main-panel" id="s2-panel">
+          <div class="telemetry mono">
+            <span><i></i>SOVEREIGN PIPELINE: ACTIVE SURVEILLANCE</span>
+            <span>BASE PERIOD: <b>INDEX = 100.0</b></span>
+          </div>
+          <div class="content">
+            <div>
+              <div class="hero-title mono">MoSPI CP-AV09 · NATIONAL DOMESTIC CIVIL AVIATION BASKET</div>
+              <div class="hero-h1">Airfare Price Index</div>
+            </div>
+            <div class="kpi-grid" id="s2-kpis">
+              <div class="kpi-card"><div class="kpi-label">Current Airfare Index</div><div class="kpi-value">118.4</div><div class="kpi-foot">Base 100.0</div></div>
+              <div class="kpi-card"><div class="kpi-label">Routes Tracked</div><div class="kpi-value">42</div><div class="kpi-foot">38 with data</div></div>
+              <div class="kpi-card"><div class="kpi-label">Fare Quotes</div><div class="kpi-value">6</div><div class="kpi-foot">Latest sample</div></div>
+              <div class="kpi-card"><div class="kpi-label">Scrape Success Rate</div><div class="kpi-value">96.4%</div><div class="kpi-foot">Last 7 runs</div></div>
+              <div class="kpi-card"><div class="kpi-label">Data Freshness</div><div class="kpi-value">3 min</div><div class="kpi-foot">LIVE</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 3 — Live data populating (7-12s) ============ -->
+      <section id="scene3" class="clip dash-scene" data-start="7" data-duration="5" data-track-index="0">
+        <aside class="sidebar" style="transform:translateX(0);">
+          <div>
+            <div class="brand">
+              <div class="brand-row">
+                <div class="brand-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+                </div>
+                <div>
+                  <strong class="brand-title">India Airfare Index</strong>
+                  <small class="brand-sub">Real-time airfare intelligence</small>
+                </div>
+              </div>
+              <span class="baseline-pill"><i></i>MoSPI / GoI CPI Baseline</span>
+            </div>
+            <nav class="nav">
+              <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Overview</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>Airfare Index</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6M18 6a9 9 0 0 1-9 9"/></svg>Routes</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/></svg>Fare Observations</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>Scrape Runs</div>
+            </nav>
+          </div>
+          <div class="sidebar-status">
+            <div class="sidebar-status-row"><span>SOURCE</span><b>Google Flights</b></div>
+            <div class="sidebar-status-row"><span>LAST SCRAPE</span><b>Just now</b></div>
+          </div>
+        </aside>
+        <div class="main-panel" style="opacity:1;">
+          <div class="telemetry mono">
+            <span><i></i>SOVEREIGN PIPELINE: ACTIVE SURVEILLANCE</span>
+            <span>CORRIDORS: <b>42 tracked</b></span>
+          </div>
+          <div class="content">
+            <div>
+              <div class="hero-title mono">MoSPI CP-AV09 · NATIONAL DOMESTIC CIVIL AVIATION BASKET</div>
+              <div class="hero-h1">Current Airfare Index: <span id="s3-counter" class="mono">100.0</span></div>
+            </div>
+            <div class="table-card" id="s3-table-card">
+              <div class="table-heading">
+                <h2>Latest Fare Quotes</h2>
+                <span>Live from API</span>
+              </div>
+              <table>
+                <thead><tr><th>CORRIDOR</th><th>AIRLINE</th><th>FARE</th><th>ADVANCE WINDOW</th></tr></thead>
+                <tbody id="s3-rows">
+                  <tr class="fare-row"><td><b>DEL-BOM</b></td><td>IndiGo</td><td>₹5,240</td><td>T+7</td></tr>
+                  <tr class="fare-row"><td><b>BLR-HYD</b></td><td>Air India</td><td>₹3,180</td><td>T+15</td></tr>
+                  <tr class="fare-row"><td><b>CCU-DEL</b></td><td>Vistara</td><td>₹6,720</td><td>T+1</td></tr>
+                  <tr class="fare-row"><td><b>MAA-BOM</b></td><td>IndiGo</td><td>₹4,050</td><td>T+30</td></tr>
+                  <tr class="fare-row"><td><b>DEL-BLR</b></td><td>Air India</td><td>₹5,890</td><td>T+45</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 4 — Methodology + scrape flow (12-17s) ============ -->
+      <section id="scene4" class="clip dash-scene" data-start="12" data-duration="5" data-track-index="0">
+        <aside class="sidebar" style="transform:translateX(0);">
+          <div>
+            <div class="brand">
+              <div class="brand-row">
+                <div class="brand-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+                </div>
+                <div>
+                  <strong class="brand-title">India Airfare Index</strong>
+                  <small class="brand-sub">Real-time airfare intelligence</small>
+                </div>
+              </div>
+              <span class="baseline-pill"><i></i>MoSPI / GoI CPI Baseline</span>
+            </div>
+            <nav class="nav">
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Overview</div>
+              <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>Airfare Index</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v6M18 6a9 9 0 0 1-9 9"/></svg>Routes</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/></svg>Fare Observations</div>
+              <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>Scrape Runs</div>
+            </nav>
+          </div>
+          <div class="sidebar-status">
+            <div class="sidebar-status-row"><span>SOURCE</span><b>Google Flights</b></div>
+            <div class="sidebar-status-row"><span>LAST SCRAPE</span><b>Just now</b></div>
+          </div>
+        </aside>
+        <div class="main-panel" style="opacity:1;">
+          <div class="ribbon mono">
+            <span><b class="ribbon-dot">●</b> METHODOLOGY: WEIGHTED MODIFIED LASPEYRES</span>
+            <span>ROUTES WITH INDEX DATA: <b>38</b></span>
+          </div>
+          <div class="content">
+            <div>
+              <div class="detail-tag mono">PRICE RELATIVE INDEX</div>
+              <div class="hero-h1">Airfare Price Index</div>
+            </div>
+            <div class="method-card" id="s4-method">
+              <div class="method-label mono">WEIGHTED PRICE-RELATIVE INDEX ACROSS TRACKED CORRIDORS</div>
+              <div class="method-value">(current fare ÷ base-period fare) × 100</div>
+            </div>
+            <div class="scrape-card" id="s4-scrape">
+              <div class="scrape-left">
+                <span class="scrape-dot" id="s4-dot"></span>
+                <div>
+                  <div class="scrape-route">DEL-BOM</div>
+                  <div class="scrape-sub" id="s4-sub">Scrape in progress…</div>
+                </div>
+              </div>
+              <span class="scrape-badge" id="s4-badge">RUNNING</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 5 — Outro (17-20s) ============ -->
+      <section id="scene5" class="clip terminal-scene" data-start="17" data-duration="3" data-track-index="0">
+        <div class="terminal-line mono" id="s5-line1">
+          <span class="prompt">&gt;</span><span id="s5-text1"></span><span class="terminal-cursor" id="s5-cursor1"></span>
+        </div>
+        <div class="terminal-line mono" id="s5-line2" style="opacity:0;">
+          <span class="prompt">&gt;</span><span id="s5-text2"></span><span class="terminal-cursor" id="s5-cursor2"></span>
+        </div>
+        <div class="outro-logo" id="s5-logo">
+          <div class="outro-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+          </div>
+          <span class="outro-logo-text">India Airfare Index</span>
+        </div>
+      </section>
+
+      <!-- ============ AUDIO ============ -->
+      <audio
+        id="bg-music"
+        src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"
+        data-start="0"
+        data-duration="20"
+        data-track-index="10"
+        data-volume="0.3"
+      ></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      /* ---------- SCENE 1 (0-3s): hook typing ---------- */
+      (function () {
+        const FULL = "SOVEREIGN PIPELINE: ACTIVE SURVEILLANCE";
+        const textEl = document.getElementById("s1-text");
+        const cursorEl = document.getElementById("s1-cursor");
+        const KEYS = ["001", "003", "005", "007", "009", "011", "013", "015"];
+        const TYPE_DUR = 1.9;
+        const len = { v: 0 };
+        tl.to(
+          len,
+          {
+            v: FULL.length,
+            duration: TYPE_DUR,
+            ease: "none",
+            onUpdate: () => {
+              const n = Math.floor(len.v);
+              textEl.textContent = FULL.substring(0, n);
+            },
+          },
+          0.15,
+        );
+        // per-character keypress SFX, randomized file, deterministic index by character position
+        for (let i = 0; i < FULL.length; i++) {
+          const t = 0.15 + (i / FULL.length) * TYPE_DUR;
+          const file = KEYS[i % KEYS.length];
+          const id = "s1-key-" + i;
+          const audioEl = document.createElement("audio");
+          audioEl.id = id;
+          audioEl.src = "assets/sfx/keyboard/keypress-" + file + ".wav";
+          audioEl.setAttribute("data-start", t.toFixed(3));
+          audioEl.setAttribute("data-duration", "0.3");
+          audioEl.setAttribute("data-track-index", String(20 + (i % 6)));
+          audioEl.setAttribute("data-volume", "0.5");
+          document.getElementById("root").appendChild(audioEl);
+        }
+        // cursor blink — deterministic sine
+        const blink = { p: 0 };
+        tl.to(
+          blink,
+          {
+            p: Math.PI * 2 * 4,
+            duration: 3,
+            ease: "none",
+            onUpdate: () => {
+              cursorEl.style.opacity = Math.sin(blink.p) > 0 ? "1" : "0";
+            },
+          },
+          0,
+        );
+        // live pulse row appears after typing completes
+        tl.to("#s1-pulse", { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.15 + TYPE_DUR + 0.15);
+        // music fade-in under the hook (from near-silent to baseline gain)
+        tl.fromTo("#bg-music", { volume: 0.05 }, { volume: 0.3, duration: 2.6, ease: "power1.inOut" }, 0.3);
+      })();
+
+      /* ---------- SCENE 2 (3-7s): dashboard reveal ---------- */
+      (function () {
+        const base = 3;
+        tl.fromTo(
+          "#s2-sidebar",
+          { x: -320 },
+          { x: 0, duration: 0.6, ease: "power3.out" },
+          base + 0.05,
+        );
+        tl.to("#s2-panel", { opacity: 1, duration: 0.4, ease: "power2.out" }, base + 0.3);
+        const cards = gsap.utils.toArray("#s2-kpis .kpi-card");
+        cards.forEach((card, i) => {
+          const t = base + 0.65 + i * 0.14;
+          tl.fromTo(card, { y: 24 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, t);
+        });
+      })();
+
+      /* ---------- SCENE 3 (7-12s): data populating ---------- */
+      (function () {
+        const base = 7;
+        // index counter: 100.0 -> 118.4
+        const counterEl = document.getElementById("s3-counter");
+        const state = { value: 100 };
+        tl.to(
+          state,
+          {
+            value: 118.4,
+            duration: 1.6,
+            ease: "power2.out",
+            onUpdate: () => {
+              counterEl.textContent = state.value.toFixed(1);
+            },
+          },
+          base + 0.2,
+        );
+        // table card fades up
+        tl.to("#s3-table-card", { opacity: 1, duration: 0.3, ease: "power2.out" }, base + 0.4);
+        // rows land one by one (waterfall, binary opacity via set + travel tween)
+        const rows = gsap.utils.toArray("#s3-rows .fare-row");
+        rows.forEach((row, i) => {
+          const t = base + 1.1 + i * 0.55;
+          tl.fromTo(row, { y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, t);
+        });
+        // soft ticks on row arrival (reuse drop sfx sparingly — only first and last row per audio.md restraint)
+      })();
+
+      /* ---------- SCENE 4 (12-17s): methodology + scrape flow ---------- */
+      (function () {
+        const base = 12;
+        tl.to("#s4-method", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.2);
+        tl.to("#s4-scrape", { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.9);
+        // status flips RUNNING -> SUCCESS partway through the scene
+        const flipAt = base + 2.6;
+        const dot = document.getElementById("s4-dot");
+        const sub = document.getElementById("s4-sub");
+        const badge = document.getElementById("s4-badge");
+        tl.to(
+          {},
+          {
+            duration: 0.01,
+            onComplete: () => {
+              dot.style.background = "#07583e";
+              sub.textContent = "142 quotes ingested";
+              badge.textContent = "SUCCESS";
+              badge.classList.add("success");
+            },
+          },
+          flipAt,
+        );
+        tl.fromTo(
+          "#s4-scrape",
+          { scale: 1 },
+          { scale: 1.015, duration: 0.15, ease: "power2.out", yoyo: true, repeat: 1 },
+          flipAt,
+        );
+        // SFX: soft confirm tick on the SUCCESS flip
+        const dropSfx = document.createElement("audio");
+        dropSfx.id = "s4-drop-sfx";
+        dropSfx.src = "assets/sfx/interface/drop_001.ogg";
+        dropSfx.setAttribute("data-start", flipAt.toFixed(3));
+        dropSfx.setAttribute("data-duration", "0.11");
+        dropSfx.setAttribute("data-track-index", "21");
+        dropSfx.setAttribute("data-volume", "0.6");
+        document.getElementById("root").appendChild(dropSfx);
+      })();
+
+      /* ---------- SCENE 5 (17-20s): outro ---------- */
+      (function () {
+        const base = 17;
+        const L1 = "Nothing on this dashboard is fake.";
+        const L2 = "Every number comes from the pipeline.";
+        const t1El = document.getElementById("s5-text1");
+        const c1El = document.getElementById("s5-cursor1");
+        const t2El = document.getElementById("s5-text2");
+        const c2El = document.getElementById("s5-cursor2");
+        const KEYS = ["001", "003", "005", "007", "009", "011", "013", "015"];
+
+        // line 1 types in
+        const T1_START = base + 0.1;
+        const T1_DUR = 1.0;
+        const len1 = { v: 0 };
+        tl.to(
+          len1,
+          {
+            v: L1.length,
+            duration: T1_DUR,
+            ease: "none",
+            onUpdate: () => {
+              t1El.textContent = L1.substring(0, Math.floor(len1.v));
+            },
+          },
+          T1_START,
+        );
+        for (let i = 0; i < L1.length; i++) {
+          const t = T1_START + (i / L1.length) * T1_DUR;
+          const file = KEYS[i % KEYS.length];
+          const audioEl = document.createElement("audio");
+          audioEl.id = "s5-l1-key-" + i;
+          audioEl.src = "assets/sfx/keyboard/keypress-" + file + ".wav";
+          audioEl.setAttribute("data-start", t.toFixed(3));
+          audioEl.setAttribute("data-duration", "0.3");
+          audioEl.setAttribute("data-track-index", String(30 + (i % 6)));
+          audioEl.setAttribute("data-volume", "0.4");
+          document.getElementById("root").appendChild(audioEl);
+        }
+        // blink cursor 1 during its active window, then hide
+        const blink1 = { p: 0 };
+        tl.to(
+          blink1,
+          {
+            p: Math.PI * 2 * 1.4,
+            duration: 0.7,
+            ease: "none",
+            onUpdate: () => {
+              c1El.style.opacity = Math.sin(blink1.p) > 0 ? "1" : "0";
+            },
+          },
+          T1_START + T1_DUR,
+        );
+
+        // line 2 fades in (its OWN row), then types
+        const T2_ROW_AT = T1_START + T1_DUR + 0.45;
+        tl.to("#s5-line2", { opacity: 1, duration: 0.01 }, T2_ROW_AT);
+        const T2_START = T2_ROW_AT + 0.05;
+        const T2_DUR = 1.0;
+        const len2 = { v: 0 };
+        tl.to(
+          len2,
+          {
+            v: L2.length,
+            duration: T2_DUR,
+            ease: "none",
+            onUpdate: () => {
+              t2El.textContent = L2.substring(0, Math.floor(len2.v));
+            },
+          },
+          T2_START,
+        );
+        for (let i = 0; i < L2.length; i++) {
+          const t = T2_START + (i / L2.length) * T2_DUR;
+          const file = KEYS[(i + 3) % KEYS.length];
+          const audioEl = document.createElement("audio");
+          audioEl.id = "s5-l2-key-" + i;
+          audioEl.src = "assets/sfx/keyboard/keypress-" + file + ".wav";
+          audioEl.setAttribute("data-start", t.toFixed(3));
+          audioEl.setAttribute("data-duration", "0.3");
+          audioEl.setAttribute("data-track-index", String(40 + (i % 6)));
+          audioEl.setAttribute("data-volume", "0.4");
+          document.getElementById("root").appendChild(audioEl);
+        }
+        const blink2 = { p: 0 };
+        tl.to(
+          blink2,
+          {
+            p: Math.PI * 2 * 1.2,
+            duration: 0.6,
+            ease: "none",
+            onUpdate: () => {
+              c2El.style.opacity = Math.sin(blink2.p) > 0 ? "1" : "0";
+            },
+          },
+          T2_START + T2_DUR,
+        );
+
+        // logo lands
+        const LOGO_AT = T2_START + T2_DUR + 0.25;
+        tl.to("#s5-logo", { opacity: 1, duration: 0.4, ease: "power2.out" }, LOGO_AT);
+        const bongSfx = document.createElement("audio");
+        bongSfx.id = "s5-bong-sfx";
+        bongSfx.src = "assets/sfx/interface/bong_001.ogg";
+        bongSfx.setAttribute("data-start", LOGO_AT.toFixed(3));
+        bongSfx.setAttribute("data-duration", "0.13");
+        bongSfx.setAttribute("data-track-index", "22");
+        bongSfx.setAttribute("data-volume", "0.35");
+        document.getElementById("root").appendChild(bongSfx);
+
+        // music fade-out over final 1.5s
+        tl.to("#bg-music", { volume: 0, duration: 1.5, ease: "power1.in" }, 18.5);
+      })();
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

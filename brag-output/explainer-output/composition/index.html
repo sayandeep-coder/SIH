@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>India Airfare Index — Explainer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0f172a;
+        font-family: "IBM Plex Sans", ui-sans-serif, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .mono {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+      }
+      .scene {
+        background: #f7f9fd;
+        padding: 64px 96px;
+        display: flex;
+        flex-direction: column;
+      }
+      .dark-scene {
+        background: #0f172a;
+      }
+      .kicker {
+        display: inline-flex;
+        align-self: flex-start;
+        font: 14px/1 "JetBrains Mono", monospace;
+        letter-spacing: 0.12em;
+        color: #103aa5;
+        background: #e6eeff;
+        padding: 8px 16px;
+        border-radius: 5px;
+        opacity: 0;
+        margin-bottom: 20px;
+      }
+      .kicker.on-dark {
+        color: #63e6be;
+        background: #14304a;
+      }
+      .scene-title {
+        font-size: 56px;
+        font-weight: 700;
+        color: #102238;
+        letter-spacing: -0.01em;
+        opacity: 0;
+        margin-bottom: 8px;
+      }
+      .scene-title.on-dark {
+        color: #ffffff;
+      }
+      .scene-sub {
+        font-size: 22px;
+        color: #475569;
+        opacity: 0;
+        max-width: 1100px;
+        margin-bottom: 36px;
+      }
+      .scene-sub.on-dark {
+        color: #94a3b8;
+      }
+
+      /* ===== Scene 1: title ===== */
+      .title-scene {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 22px;
+      }
+      .title-logo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+      }
+      .title-logo-icon {
+        width: 56px;
+        height: 56px;
+        border: 1px solid #3157aa;
+        background: #17264c;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+      }
+      .title-logo-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+      .title-main {
+        font-size: 68px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.01em;
+        opacity: 0;
+      }
+      .title-sub {
+        font: 22px "JetBrains Mono", monospace;
+        color: #63e6be;
+        letter-spacing: 0.05em;
+        opacity: 0;
+      }
+      .title-tag {
+        font-size: 20px;
+        color: #94a3b8;
+        max-width: 900px;
+        opacity: 0;
+        margin-top: 8px;
+      }
+
+      /* ===== Card grid (generic) ===== */
+      .card-row {
+        display: grid;
+        gap: 18px;
+        flex: 1;
+      }
+      .info-card {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 10px;
+        padding: 22px 24px;
+        opacity: 0;
+      }
+      .info-card .ic-label {
+        font: 12px "JetBrains Mono", monospace;
+        color: #64748b;
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+      }
+      .info-card .ic-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #102238;
+      }
+      .info-card .ic-foot {
+        font-size: 14px;
+        color: #475569;
+        margin-top: 6px;
+      }
+
+      /* ===== Scene 2: WHAT — windows table ===== */
+      .windows-table {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 10px;
+        overflow: hidden;
+        opacity: 0;
+      }
+      .wt-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        border-bottom: 1px solid #eef2f8;
+      }
+      .wt-row:last-child {
+        border-bottom: none;
+      }
+      .wt-row.head {
+        background: #f1f5f9;
+      }
+      .wt-row.head > div {
+        font: 12px "JetBrains Mono", monospace;
+        color: #475569;
+        letter-spacing: 0.08em;
+        padding: 12px 20px;
+      }
+      .wt-row:not(.head) > div {
+        padding: 16px 20px;
+        font-size: 18px;
+        color: #102238;
+      }
+      .wt-row:not(.head) > div:first-child {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        color: #103aa5;
+      }
+      .wt-row {
+        opacity: 0;
+      }
+      .wt-row.head {
+        opacity: 1;
+      }
+
+      /* ===== Scene 4: HOW — pipeline ===== */
+      .pipeline-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        flex: 1;
+        flex-wrap: wrap;
+        row-gap: 28px;
+      }
+      .pipe-node {
+        background: #14304a;
+        border: 1px solid #2a4a72;
+        border-radius: 10px;
+        padding: 18px 22px;
+        min-width: 210px;
+        text-align: center;
+        opacity: 0;
+      }
+      .pipe-node .pn-label {
+        font: 12px "JetBrains Mono", monospace;
+        color: #63e6be;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+      }
+      .pipe-node .pn-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .pipe-arrow {
+        color: #3e62af;
+        font-size: 28px;
+        padding: 0 14px;
+        opacity: 0;
+      }
+
+      /* ===== Scene 5: MATHS ===== */
+      .math-block {
+        background: #fff;
+        border: 1px solid #dce4f0;
+        border-radius: 10px;
+        padding: 26px 30px;
+        opacity: 0;
+      }
+      .math-label {
+        font: 13px "JetBrains Mono", monospace;
+        color: #64748b;
+        letter-spacing: 0.06em;
+        margin-bottom: 12px;
+      }
+      .math-formula {
+        font: 30px "JetBrains Mono", monospace;
+        color: #102238;
+        font-weight: 600;
+      }
+      .math-formula .var {
+        color: #103aa5;
+      }
+      .math-result {
+        font: 30px "JetBrains Mono", monospace;
+        color: #07583e;
+        font-weight: 700;
+      }
+      .math-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        flex: 1;
+        justify-content: center;
+      }
+      .math-step {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        opacity: 0;
+      }
+      .math-step .ms-tag {
+        font: 13px "JetBrains Mono", monospace;
+        color: #64748b;
+        min-width: 90px;
+      }
+      .math-step .ms-eq {
+        font: 22px "JetBrains Mono", monospace;
+        color: #102238;
+      }
+      .math-step .ms-eq b {
+        color: #07583e;
+        font-weight: 700;
+      }
+      .apix-final {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        opacity: 0;
+      }
+      .apix-final .af-label {
+        font-size: 22px;
+        color: #475569;
+      }
+      .apix-final .af-value {
+        font: 64px "JetBrains Mono", monospace;
+        font-weight: 700;
+        color: #103aa5;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ===== Scene 6: outro ===== */
+      .outro-scene {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 18px;
+      }
+      .outro-value {
+        font: 88px "JetBrains Mono", monospace;
+        font-weight: 700;
+        color: #63e6be;
+        opacity: 0;
+      }
+      .outro-line {
+        font-size: 26px;
+        color: #cbd5e1;
+        max-width: 1000px;
+        opacity: 0;
+      }
+      .outro-logo-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 14px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="50"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- ============ SCENE 1 — Title (0-4s) ============ -->
+      <section id="scene1" class="clip title-scene dark-scene" data-start="0" data-duration="4" data-track-index="0">
+        <div class="title-logo" id="t-logo">
+          <div class="title-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+          </div>
+        </div>
+        <div class="title-main" id="t-main">India Airfare Price Index</div>
+        <div class="title-sub mono" id="t-sub">APIx — WHAT · WHY · HOW · MATHS</div>
+        <div class="title-tag" id="t-tag">Turning daily airfare observations into a statistical price index</div>
+      </section>
+
+      <!-- ============ SCENE 2 — WHAT (4-13s) ============ -->
+      <section id="scene2" class="clip scene" data-start="4" data-duration="9" data-track-index="0">
+        <div class="kicker mono" id="s2-kicker">01 · WHAT</div>
+        <div class="scene-title" id="s2-title">Real-Time Airfare Price Index</div>
+        <div class="scene-sub" id="s2-sub">Automatically collect domestic airfare observations and convert them into a statistical airfare price index.</div>
+        <div class="card-row" style="grid-template-columns: 1.1fr 1.4fr;" id="s2-cards">
+          <div class="info-card" id="s2-card1">
+            <div class="ic-label">ROUTES TRACKED</div>
+            <div class="ic-value">DEL-BOM · BOM-BLR · MAA-BLR</div>
+            <div class="ic-foot">DEL-BLR · CCU-BOM · HYD-DEL</div>
+          </div>
+          <div class="windows-table" id="s2-table">
+            <div class="wt-row head"><div>WINDOW</div><div>MEANING</div></div>
+            <div class="wt-row" id="s2-w1"><div>T+1</div><div>Flight one day after the scrape date</div></div>
+            <div class="wt-row" id="s2-w2"><div>T+7</div><div>Flight seven days after the scrape date</div></div>
+            <div class="wt-row" id="s2-w3"><div>T+15</div><div>Flight fifteen days after the scrape date</div></div>
+            <div class="wt-row" id="s2-w4"><div>T+30</div><div>Flight thirty days after the scrape date</div></div>
+            <div class="wt-row" id="s2-w5"><div>T+45</div><div>Flight forty-five days after the scrape date</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 3 — WHY (13-22s) ============ -->
+      <section id="scene3" class="clip scene" data-start="13" data-duration="9" data-track-index="0">
+        <div class="kicker mono" id="s3-kicker">02 · WHY</div>
+        <div class="scene-title" id="s3-title">Why Build It?</div>
+        <div class="scene-sub" id="s3-sub">Airfare is volatile — lead time, demand, seasonality and route all move the price. A manual survey can't keep up.</div>
+        <div class="card-row" style="grid-template-columns: repeat(3, 1fr);" id="s3-cards">
+          <div class="info-card" id="s3-card1">
+            <div class="ic-label">WHY AN INDEX</div>
+            <div class="ic-value" style="font-size:19px;">One fare is an observation. An index summarizes movement across a basket of routes and windows.</div>
+          </div>
+          <div class="info-card" id="s3-card2">
+            <div class="ic-label">WHY T+1 → T+45</div>
+            <div class="ic-value" style="font-size:19px;">Airfare depends on how far in advance you price it — the windows capture booking lead time.</div>
+          </div>
+          <div class="info-card" id="s3-card3">
+            <div class="ic-label">WHO BENEFITS</div>
+            <div class="ic-value" style="font-size:19px;">MoSPI / NSO, analysts and policymakers monitoring airfare for CPI-related analysis.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 4 — HOW / pipeline (22-34s) ============ -->
+      <section id="scene4" class="clip scene dark-scene" data-start="22" data-duration="12" data-track-index="0">
+        <div class="kicker mono on-dark" id="s4-kicker">03 · HOW</div>
+        <div class="scene-title on-dark" id="s4-title">The Pipeline</div>
+        <div class="scene-sub on-dark" id="s4-sub">Every route, every window, every day — the same automated path from scrape to index.</div>
+        <div class="pipeline-row" id="s4-pipeline">
+          <div class="pipe-node" id="s4-n1"><div class="pn-label">01</div><div class="pn-title">Google Flights</div></div>
+          <div class="pipe-arrow" id="s4-a1">&rarr;</div>
+          <div class="pipe-node" id="s4-n2"><div class="pn-label">02</div><div class="pn-title">Playwright Scraper</div></div>
+          <div class="pipe-arrow" id="s4-a2">&rarr;</div>
+          <div class="pipe-node" id="s4-n3"><div class="pn-label">03</div><div class="pn-title">Raw Fare Quotes</div></div>
+          <div class="pipe-arrow" id="s4-a3">&rarr;</div>
+          <div class="pipe-node" id="s4-n4"><div class="pn-label">04</div><div class="pn-title">Validate + Normalize</div></div>
+          <div class="pipe-arrow" id="s4-a4">&rarr;</div>
+          <div class="pipe-node" id="s4-n5"><div class="pn-label">05</div><div class="pn-title">Dedupe + Outliers</div></div>
+          <div class="pipe-arrow" id="s4-a5">&rarr;</div>
+          <div class="pipe-node" id="s4-n6"><div class="pn-label">06</div><div class="pn-title">Fare Observations</div></div>
+          <div class="pipe-arrow" id="s4-a6">&rarr;</div>
+          <div class="pipe-node" id="s4-n7"><div class="pn-label">07</div><div class="pn-title">Route Index</div></div>
+          <div class="pipe-arrow" id="s4-a7">&rarr;</div>
+          <div class="pipe-node" id="s4-n8" style="background:#17264c;border-color:#3157aa;"><div class="pn-label">08</div><div class="pn-title">Weighted APIx</div></div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 5 — MATHS (34-46s) ============ -->
+      <section id="scene5" class="clip scene" data-start="34" data-duration="12" data-track-index="0">
+        <div class="kicker mono" id="s5-kicker">04 · MATHS</div>
+        <div class="scene-title" id="s5-title">From Fares to an Index</div>
+        <div class="math-steps" id="s5-steps">
+          <div class="math-step" id="s5-step1">
+            <span class="ms-tag">Window Index</span>
+            <span class="ms-eq">(Current Fare / Base Fare) × 100 = <b>(6,500 / 5,000) × 100 = 130.00</b></span>
+          </div>
+          <div class="math-step" id="s5-step2">
+            <span class="ms-tag">Route Index</span>
+            <span class="ms-eq">Σ (Window Weight × Window Index) = <b>131.87</b> for MAA-BLR</span>
+          </div>
+          <div class="math-step" id="s5-step3">
+            <span class="ms-tag">Overall APIx</span>
+            <span class="ms-eq">Σ (Route Weight × Route Index)</span>
+          </div>
+          <div class="apix-final" id="s5-final">
+            <span class="af-label">India APIx =</span>
+            <span class="af-value mono" id="s5-counter">100.00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SCENE 6 — Outro (46-50s) ============ -->
+      <section id="scene6" class="clip outro-scene dark-scene" data-start="46" data-duration="4" data-track-index="0">
+        <div class="outro-value mono" id="o-value">125.87</div>
+        <div class="outro-line" id="o-line">Airfares are running ~25.87% above the base period — a live, reproducible signal, not a guess.</div>
+        <div class="outro-logo-row" id="o-logo">
+          <div class="title-logo-icon" style="width:40px;height:40px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dce4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.3.5-.1 1.1.4 1.4L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.5.9.7 1.4.4l.5-.3c.4-.2.6-.6.5-1.1z"/></svg>
+          </div>
+          <span style="color:#fff;font-size:20px;font-weight:600;">India Airfare Index (APIx)</span>
+        </div>
+      </section>
+
+      <!-- ============ AUDIO ============ -->
+      <audio
+        id="bg-music"
+        src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"
+        data-start="0"
+        data-duration="50"
+        data-track-index="10"
+        data-volume="0.22"
+      ></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      /* ---------- SCENE 1 (0-4s): title ---------- */
+      (function () {
+        const base = 0;
+        tl.fromTo("#t-logo", { y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, base + 0.15);
+        tl.fromTo("#t-main", { y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, base + 0.45);
+        tl.fromTo("#t-sub", { y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, base + 1.05);
+        tl.fromTo("#t-tag", { y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, base + 1.45);
+        tl.fromTo("#bg-music", { volume: 0.02 }, { volume: 0.22, duration: 2.5, ease: "power1.inOut" }, base + 0.2);
+      })();
+
+      /* ---------- SCENE 2 (4-13s): WHAT ---------- */
+      (function () {
+        const base = 4;
+        tl.fromTo("#s2-kicker", { y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, base + 0.1);
+        tl.fromTo("#s2-title", { y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.3);
+        tl.fromTo("#s2-sub", { y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.6);
+        tl.fromTo("#s2-card1", { y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 1.0);
+        tl.fromTo("#s2-table", { y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 1.2);
+        const rows = ["#s2-w1", "#s2-w2", "#s2-w3", "#s2-w4", "#s2-w5"];
+        rows.forEach((sel, i) => {
+          const t = base + 1.7 + i * 0.5;
+          tl.fromTo(sel, { y: 12 }, { opacity: 1, y: 0, duration: 0.28, ease: "power3.out" }, t);
+        });
+      })();
+
+      /* ---------- SCENE 3 (13-22s): WHY ---------- */
+      (function () {
+        const base = 13;
+        tl.fromTo("#s3-kicker", { y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, base + 0.1);
+        tl.fromTo("#s3-title", { y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.3);
+        tl.fromTo("#s3-sub", { y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.6);
+        const cards = ["#s3-card1", "#s3-card2", "#s3-card3"];
+        cards.forEach((sel, i) => {
+          const t = base + 1.1 + i * 0.35;
+          tl.fromTo(sel, { y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t);
+        });
+      })();
+
+      /* ---------- SCENE 4 (22-34s): HOW pipeline ---------- */
+      (function () {
+        const base = 22;
+        tl.fromTo("#s4-kicker", { y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, base + 0.1);
+        tl.fromTo("#s4-title", { y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.3);
+        tl.fromTo("#s4-sub", { y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.6);
+        const nodes = ["#s4-n1", "#s4-n2", "#s4-n3", "#s4-n4", "#s4-n5", "#s4-n6", "#s4-n7", "#s4-n8"];
+        const arrows = ["#s4-a1", "#s4-a2", "#s4-a3", "#s4-a4", "#s4-a5", "#s4-a6", "#s4-a7"];
+        let t = base + 1.1;
+        nodes.forEach((sel, i) => {
+          tl.fromTo(sel, { y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, t);
+          if (arrows[i]) {
+            tl.to(arrows[i], { opacity: 1, duration: 0.2, ease: "power2.out" }, t + 0.3);
+          }
+          t += 0.6;
+        });
+      })();
+
+      /* ---------- SCENE 5 (34-46s): MATHS ---------- */
+      (function () {
+        const base = 34;
+        tl.fromTo("#s5-kicker", { y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, base + 0.1);
+        tl.fromTo("#s5-title", { y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 0.3);
+        tl.fromTo("#s5-step1", { y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 1.0);
+        tl.fromTo("#s5-step2", { y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 3.4);
+        tl.fromTo("#s5-step3", { y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 5.8);
+        tl.fromTo("#s5-final", { y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, base + 7.4);
+        // counter 100 -> 125.87
+        const counterEl = document.getElementById("s5-counter");
+        const state = { value: 100 };
+        tl.to(
+          state,
+          {
+            value: 125.87,
+            duration: 2.0,
+            ease: "power2.out",
+            onUpdate: () => {
+              counterEl.textContent = state.value.toFixed(2);
+            },
+          },
+          base + 7.7,
+        );
+      })();
+
+      /* ---------- SCENE 6 (46-50s): outro ---------- */
+      (function () {
+        const base = 46;
+        const counterEl = document.getElementById("o-value");
+        tl.fromTo(counterEl, { y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, base + 0.15);
+        tl.fromTo("#o-line", { y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, base + 0.75);
+        tl.fromTo("#o-logo", { y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, base + 1.4);
+        tl.to("#bg-music", { volume: 0, duration: 1.6, ease: "power1.in" }, 48.4);
+      })();
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

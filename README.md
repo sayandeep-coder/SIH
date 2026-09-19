@@ -375,3 +375,113 @@ running.
 | Dashboard shows "could not reach the API" | Backend isn't running, or `NEXT_PUBLIC_API_BASE_URL` in `frontend/.env.local` doesn't match where the backend actually is |
 | Celery task never runs | Make sure a worker is actually running (`celery -A app.celery_app worker`) and check `CELERY_BROKER_URL`/`CELERY_RESULT_BACKEND` point at a reachable Redis |
 | New route/airport not showing up | Run `scripts/seed_airports.py` / `scripts/seed_routes.py` again — they're safe to re-run |
+
+---
+
+## 11. How this differs from the official government CPI (for judges)
+
+This section exists so anyone on the team can explain, with real cited numbers, why this
+project isn't a re-implementation of something MoSPI already does. The live version of
+this comparison — with numbers pulled straight from this project's own database — is on
+the dashboard at **`/solution`**. What follows is the same comparison in writing, with
+sources, so it can be read without the app running.
+
+### 11.1 The government's actual numbers (primary source, not a summary of a summary)
+
+All of the following is quoted or directly derived from MoSPI's own **"Frequently Asked
+Questions (FAQs) on CPI 2024 Series"** PDF — the questions are numbered to match that
+document so anyone can verify them:
+
+**Source:** https://www.mospi.gov.in/uploads/documents/documents/1770891066052-Annexure_V.pdf
+
+| # | What it says | MoSPI FAQ # |
+|---|---|---|
+| Markets covered | 1,465 rural markets + 1,395 urban markets across 434 towns | Q7 |
+| Online markets | 12 online markets, across 12 towns with population > 25 lakh | Q7 |
+| Rural/urban price collection frequency | Monthly | Q8 |
+| Online price collection frequency (this includes airfare) | **Weekly** | Q8 |
+| How airfares specifically are collected | "Airfares are collected through well-known online platforms." | Q27 |
+| Elementary-level index formula | Jevons index | Q20 |
+| Higher-level index formula | Young / Modified Laspeyres index | Q21 |
+| CPI structure | 12 Divisions, 43 Groups, 92 Classes, 162 Sub-classes (COICOP 2018) | Q19 |
+| "Transport" division weight, Combined, CPI 2024 series | **8.796%** | Division-wise weight table (FAQ page 6) |
+| Base year | 2024 = 100 | Q4 |
+| New series first released | 12 February 2026 | Public MoSPI press release |
+| Publication cadence | Monthly, released ~12th of the following month | Public MoSPI press releases |
+
+**Other useful background (secondary sources, cited separately since they're not in the
+FAQ PDF itself):**
+
+- MoSPI CPI weight tables (historical, all-India, group/sub-group level):
+  https://www.mospi.gov.in/112-wights-various-cpi-series-all-india-group-and-sub-group-levels
+- MoSPI Price Collection Survey (methodology, Field Operations Division of NSS):
+  https://www.mospi.gov.in/price-collection-survey
+- MoSPI CPI 2010 manual (older but still the most detailed public methodology document):
+  https://mospi.gov.in/sites/default/files/publication_reports/manual_cpi_2010.pdf
+- MoSPI press release, CPI for February 2026 (confirms release cadence):
+  https://www.mospi.gov.in/uploads/latestReleases/latest_release_1773310539387_714ce3b5-4644-4aef-b2e3-64433640a9c3_Press_Release_of_CPI_February_2026.pdf
+
+### 11.2 The honest version of the gap (don't overstate this to judges)
+
+**What MoSPI already does well, and we should say so plainly:** the CPI 2024 series
+already collects airfare weekly, through online platforms, not a paper survey. That's a
+real modernisation from the old CPI 2012 series. Claiming the government "still does this
+manually" is **false** and will not survive a judge who has read the same FAQ — don't say
+it.
+
+**What MoSPI's public CPI genuinely does not give you**, and this is the real gap this
+project targets:
+
+1. **No route-level breakdown.** Airfare is one COICOP item folded into the 8.796%
+   "Transport" division. There is no published "Delhi–Mumbai" or "Kolkata–Bengaluru"
+   figure — just one national number.
+2. **No booking-lead-time dimension.** CPI has no concept of "price if booked 1 day out"
+   vs "price if booked 45 days out." One fare, one week, no window.
+3. **No public raw data.** You cannot see the underlying observations, only the published
+   index number itself.
+
+This project (APIx) adds exactly those three things — route-level indices, five explicit
+advance-booking windows (T+1/7/15/30/45), and a fully queryable raw-observation history —
+without claiming to replace or outperform the official CPI at what it already does.
+
+### 11.3 Our own numbers, and where to get them live
+
+Unlike the government figures above, our numbers are not static — they come from this
+project's own live database and change as more scrapes run. Don't hardcode them into a
+slide; pull them fresh right before presenting:
+
+```bash
+# Overall index + how many advance-booking windows exist
+curl -s http://localhost:8000/api/v1/index | python3 -m json.tool
+
+# How many routes are tracked
+curl -s http://localhost:8000/api/v1/routes | python3 -c "import json,sys; print(len(json.load(sys.stdin)))"
+
+# Raw + cleaned observation counts, outlier rate
+curl -s http://localhost:8000/api/v1/quality/summary | python3 -m json.tool
+
+# Scrape run history (used to compute "how often do we actually update")
+curl -s "http://localhost:8000/api/v1/scraping/runs?limit=50" | python3 -m json.tool
+```
+
+Or just open the dashboard at `/solution` — it runs these same calls in the browser and
+renders the comparison table and bar chart live, with a loading state instead of a
+fabricated number if the backend happens to be down.
+
+### 11.4 How to explain this to judges, in one breath
+
+> "MoSPI's CPI already collects airfare weekly through online platforms — that part
+> isn't broken. What it publishes is one national number, once a month, with no route
+> and no booking window. We built the layer underneath that: a live, per-route,
+> per-booking-window index, built from the same kind of online fare data MoSPI already
+> uses, just broken out to the granularity a monthly national figure structurally can't
+> publish. We're not replacing the CPI — we're the detail underneath it."
+
+**If asked "why not just wait for MoSPI to add this themselves":** their FAQ already
+signals the direction (Q26 — "alternative data sources such as administrative data and
+e-commerce/online price data") — this project is a working demonstration of exactly that
+kind of alternative-data augmentation, scoped to one volatile item (airfare) end to end.
+
+**If asked for a number, not a claim:** point them at `/solution` on the dashboard —
+every comparison row there is computed from the same live API calls in section 11.3, not
+typed in by hand.

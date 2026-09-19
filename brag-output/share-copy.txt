@@ -1,0 +1,2 @@
+Introducing India Airfare Index: a live CPI for domestic flight prices, built from real Google Flights scrapes, not hardcoded numbers.
+Built with FastAPI, Celery, Playwright, and Postgres — every number on the dashboard traces back to the pipeline.

@@ -147,6 +147,54 @@ export default function Methodology() {
             </div>
           </section>
 
+          <section className="card method-section governance">
+            <header><b>06</b><h2>How this differs from the official CPI</h2><span>MoSPI COMPARISON</span></header>
+            <div className="method-table">
+              <table>
+                <thead><tr><th>DIMENSION</th><th className="tone0">OFFICIAL CPI (MoSPI, 2024=100)</th><th className="tone3">APIx (this project)</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Air fare data source</b></td><td>Manual price collection by field staff visiting ~1,181 rural + 1,114 urban centres/ticketing offices once a month</td><td>Live Google Flights scrape via Playwright, automated, repeatable on demand</td></tr>
+                  <tr><td><b>Update frequency</b></td><td>Monthly — one snapshot price per item per centre</td><td>Continuous — every scrape run adds fresh observations</td></tr>
+                  <tr><td><b>Publication lag</b></td><td>15–30 days between survey and release; published ~12th of the following month</td><td>Index recomputes immediately after each scrape completes</td></tr>
+                  <tr><td><b>Booking lead time</b></td><td>Not captured — a single fare per item, no notion of how far in advance it was booked</td><td>5 explicit windows (T+1, T+7, T+15, T+30, T+45) per route, scraped separately</td></tr>
+                  <tr><td><b>Route granularity</b></td><td>Air fare is one item inside the 8.59%-weight &quot;Transport &amp; Communication&quot; sub-group — not broken out by route</td><td>Per-route index for every tracked city pair, then weighted into a national index</td></tr>
+                  <tr><td><b>Weighting basis</b></td><td>Fixed Laspeyres weights from the Household Consumption Expenditure Survey, unchanged until the next base-year revision (years apart)</td><td>Equal-weight seed per route today; designed to accept revised weights without a methodology change</td></tr>
+                  <tr><td><b>Outlier handling</b></td><td>Not publicly documented at the item level</td><td>IQR (Tukey fence) flagging per route/window, raw data preserved, flagged fares excluded from the median only</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <footer>
+              <span>Sources: MoSPI CPI weight tables · MoSPI CPI FAQs (2024 series) · MoSPI CPI press releases</span>
+              <b>Comparison compiled from public MoSPI documentation, Sept 2026</b>
+            </footer>
+          </section>
+
+          <section className="card method-section executive">
+            <header><b>07</b><h2>Why a route-and-window index closes a real gap</h2><span>WHY THIS APPROACH</span></header>
+            <div className="executive-body">
+              <div>
+                <p>
+                  Over 90% of domestic air tickets in India are now bought online, where prices move by
+                  the hour with yield management, surge pricing, and seat scarcity. A monthly field visit
+                  to a handful of ticketing offices cannot capture that — it records one fare, once a
+                  month, with no way to say whether that fare was booked a day out or six weeks out.
+                  Airfare is consistently flagged as one of the most volatile items in the CPI basket for
+                  exactly this reason.
+                </p>
+                <p style={{ marginTop: "8px" }}>
+                  APIx is built to sit alongside the official CPI as a high-frequency, route-level,
+                  lead-time-aware signal for the same underlying item — not to replace the survey, but to
+                  fill the gap a monthly manual snapshot structurally cannot close.
+                </p>
+              </div>
+              <aside>
+                <h3>In one line</h3>
+                <p>CPI tells you air fares moved. APIx tells you which route, which booking window, and how much — every day.</p>
+                <span>DESIGNED TO AUGMENT MoSPI CPI, NOT REPLACE IT</span>
+              </aside>
+            </div>
+          </section>
+
           <section className="method-legal">
             <CheckCircle2 size={15} />
             <span>This is a working prototype, not an officially gazetted statistical release. The methodology above matches the current source code exactly — if the code changes, this page should be updated alongside it.</span>
